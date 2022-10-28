@@ -1,0 +1,340 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright (C) 2022 Gateworks Corporation
+ */
+
+#include "cn9130-malibu.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/leds/common.h>
+
+/ {
+	model = "Gateworks Malibu GW8901 CN9130";
+	compatible = "gateworks,gw8901",
+		"marvell,cn9130",
+		"marvell,armada-ap806-quad",
+		"marvell,armada-ap806";
+
+	aliases {
+		i2c0 = &cp0_i2c0;
+		ethernet0 = &cp0_eth0;
+		ethernet1 = &cp0_eth1;
+		gpio0 = &ap_gpio0;
+		gpio1 = &cp0_gpio0;
+		gpio2 = &cp0_gpio1;
+	};
+
+	led-controller {
+		pinctrl-names = "default";
+		pinctrl-0 = <&cp0_led_pins>;
+		compatible = "gpio-leds";
+
+		led-0 {
+			function = LED_FUNCTION_HEARTBEAT;
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&cp0_gpio1 3 GPIO_ACTIVE_HIGH>; /* CP_MPP[35] */
+			default-state = "on";
+			linux,default-trigger = "heartbeat";
+		};
+
+		led-1 {
+			function = LED_FUNCTION_STATUS;
+			color = <LED_COLOR_ID_RED>;
+			gpios = <&cp0_gpio1 4 GPIO_ACTIVE_HIGH>; /* CP_MPP[36] */
+			default-state = "off";
+		};
+
+		led-2 {
+			function = LED_FUNCTION_STATUS;
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&cp0_gpio0 12 GPIO_ACTIVE_HIGH>; /* CP_MPP[12] */
+			default-state = "off";
+		};
+
+		led-3 {
+			function = LED_FUNCTION_STATUS;
+			color = <LED_COLOR_ID_YELLOW>;
+			gpios = <&cp0_gpio0 30 GPIO_ACTIVE_HIGH>; /* CP_MPP[30] */
+			default-state = "off";
+		};
+	};
+};
+
+&cp0_comphy {
+	phy0 {
+		phy-type = <COMPHY_TYPE_PEX0>;
+	};
+
+	phy1 {
+		phy-type = <COMPHY_TYPE_PEX0>;
+	};
+
+	phy2 {
+		phy-type = <COMPHY_TYPE_PEX0>;
+	};
+
+	phy3 {
+		phy-type = <COMPHY_TYPE_PEX0>;
+	};
+
+	phy4 {
+		phy-type = <COMPHY_TYPE_SFI0>;
+		phy-speed = <COMPHY_SPEED_10_3125G>;
+	};
+};
+		
+&cp0_pcie0 {
+	num-lanes = <4>;
+		/* non-prefetchable memory */
+	ranges =<0x82000000 0 0xc0000000 0 0xc0000000 0 0x2000000>;
+	status = "disabled";
+};
+
+&cp0_pinctl {
+	/* MPP Bus:
+	 *  [0-11]	RGMII1 (3)
+	 *  [12-33]	GPIO (0)
+	 *  [34]	PCIE0_CLKREQn (9)
+	 *  [35-36]	GPIO (0)
+	 *  [37-38]	I2C (2)
+	 *  [39]	GPIO (0)
+	 *  [40-43]	SMI/XMI (8)
+	 *  [44-46]	GPIO (0)
+	 *  [47-50]	SPI (5)
+	 *  [51]	GPIO (0)
+	 *  [52]	PCIE_RSTn (9)
+	 *  [53-54]	GPIO (0)
+	 *  [55]	SD_DET (0xb)
+	 *  [56-62]	SDIO (0xe)
+	 */
+		/*   0   1   2   3   4   5   6   7   8   9 */
+	pin-func = < 3   3   3   3   3   3   3   3   3   3
+		     3   3   0   0   0   0   0   0   0   0
+		     0   0   0   0   0   0   0   0   0   0
+		     0   0   0   0   9   0   0   2   2   0
+		     8   8   8   8   0   0   0   5   5   5
+		     5   0   9   0   0   0xb 0xe 0xe 0xe 0xe
+		     0xe 0xe 0xe>;
+
+	cp0_gsc_pins: cp0-gsc-pins-0 {
+		marvell,pins = < 28 >;
+		marvell,function = <0>;
+	};
+
+	cp0_led_pins: cp0-led-pins-0 {
+		marvell,pins = < 12 30 35 36 >;
+		marvell,function = <0>;
+	};
+
+	cp0_sdhci_cd_pins_gw8901: cp0-sdhci-cd-pins-gw8901 {
+		marvell,pins = < 55 >;
+		marvell,function = <0>;
+	};
+
+	cp0_spi1_pins_gw8901: cp0-spi-pins-1-gw8901 {
+		marvell,pins = < 47 48 49 50 >;
+		marvell,function = <6>;
+	};
+
+	cp0_smi_pins_gw8901: cp0-smi-pins-gw8901 {
+		marvell,pins = < 40 41 >;
+		marvell,function = <8>;
+	};
+
+	cp0_xsmi_pins_gw8901: cp0-xsmi-pins-gw8901 {
+		marvell,pins = < 42 43 >;
+		marvell,function = <8>;
+	};
+};
+
+&cp0_i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cp0_i2c0_pins>;
+	status = "okay";
+	clock-frequency = <100000>;
+
+	gsc: gsc@20 {
+		pinctrl-names = "default";
+		pinctrl-0 = <&cp0_gsc_pins>;
+		compatible = "gw,gsc";
+		reg = <0x20>;
+		interrupt-parent = <&cp0_gpio0>;
+		interrupts = <28 IRQ_TYPE_EDGE_FALLING>;
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		adc {
+			compatible = "gw,gsc-adc";
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			channel@6 {
+				gw,mode = <0>;
+				reg = <0x06>;
+				label = "temp";
+			};
+
+			channel@16 {
+				gw,mode = <4>;
+				reg = <0x16>;
+				label = "fan_tach";
+			};
+
+			channel@82 {
+				gw,mode = <2>;
+				reg = <0x82>;
+				label = "vdd_5p0";
+				gw,voltage-divider-ohms = <10000 10000>;
+			};
+
+			channel@84 {
+				gw,mode = <2>;
+				reg = <0x84>;
+				label = "vdd_3p3";
+				gw,voltage-divider-ohms = <10000 10000>;
+			};
+
+			channel@86 {
+				gw,mode = <2>;
+				reg = <0x86>;
+				label = "vdd_2p5";
+				gw,voltage-divider-ohms = <10000 10000>;
+			};
+
+			channel@88 {
+				gw,mode = <2>;
+				reg = <0x88>;
+				label = "vdd_2p0";
+			};
+
+			channel@8c {
+				gw,mode = <2>;
+				reg = <0x8c>;
+				label = "vdd_1p8";
+			};
+
+			channel@8e {
+				gw,mode = <2>;
+				reg = <0x8e>;
+				label = "vdd_1p2";
+			};
+
+			channel@90 {
+				gw,mode = <2>;
+				reg = <0x90>;
+				label = "vdd_ap";
+			};
+
+			channel@92 {
+				gw,mode = <2>;
+				reg = <0x92>;
+				label = "vdd_0p7";
+			};
+		};
+
+		fan-controller@2c {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			compatible = "gw,gsc-fan";
+			reg = <0x0a>;
+		};
+	};
+
+	eeprom@50 {
+		compatible = "atmel,24c02";
+		reg = <0x50>;
+		pagesize = <16>;
+	};
+
+	eeprom@51 {
+		compatible = "atmel,24c02";
+		reg = <0x51>;
+		pagesize = <16>;
+	};
+
+	eeprom@52 {
+		compatible = "atmel,24c02";
+		reg = <0x52>;
+		pagesize = <16>;
+	};
+
+	eeprom@53 {
+		compatible = "atmel,24c02";
+		reg = <0x53>;
+		pagesize = <16>;
+	};
+
+	rtc@68 {
+		compatible = "dallas,ds1672";
+		reg = <0x68>;
+	};
+};
+
+/* microSD */
+&cp0_sdhci0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cp0_sdhci_pins
+		     &cp0_sdhci_cd_pins_gw8901>;
+	bus-width = <4>;
+	cd-gpios = <&cp0_gpio1 23 GPIO_ACTIVE_HIGH>; /* CP_MPP[55] */
+	no-1-8-v;
+	status = "okay";
+};
+
+&cp0_spi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cp0_spi1_pins_gw8901>;
+	reg = <0x700680 0x50>,		/* control */
+	      <0x2000000 0x1000000>;	/* CS0 */
+	status = "okay";
+
+	tpm@0 {
+		compatible = "microchip,attpm20p", "tcg,tpm_tis-spi";
+		reg = <0x0>;
+		spi-max-frequency = <10000000>;
+		// IRQ is CP_MPP[58]
+	};
+};
+
+&cp0_mdio {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cp0_smi_pins_gw8901>;
+	status = "okay";
+
+	phy0: ethernet-phy@0 {
+		compatible = "ethernet-phy-ieee802.3-c22";
+		interrupt-parent = <&cp0_gpio0>;
+		interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
+		reg = <0>;
+	};
+};
+
+&cp0_xmdio {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cp0_xsmi_pins_gw8901>;
+	status = "okay";
+
+	phy1: ethernet-phy@8 {
+		compatible = "ethernet-phy-ieee802.3-c45";
+		interrupt-parent = <&cp0_gpio1>;
+		interrupts = <22 IRQ_TYPE_LEVEL_LOW>;
+		reg = <8>;
+	};
+};
+
+&cp0_ethernet {
+	status = "okay";
+};
+
+/* 10GbE XFI AQR113C */
+&cp0_eth0 {
+	status = "okay";
+	phy = <&phy1>;
+	phy-mode = "10gbase-r";
+};
+
+/* 1GbE RGMII GPY111 */
+&cp0_eth1 {
+	status = "okay";
+	phy = <&phy0>;
+	phy-mode = "rgmii-id";
+};

@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: GPL-2.0+ OR BSD-3-Clause
+
+&cp0_gpio0 {
+	rgmiiphyrstgpio {
+		gpio-hog;
+		output-high;
+		gpios = <13 GPIO_ACTIVE_HIGH>; // CP_MPP[13]
+		line-name = "rgm_rst#";
+	};
+
+	ledgbegpio {
+		gpio-hog;
+		output-low;
+		gpios = <27 GPIO_ACTIVE_HIGH>; // CP_MPP[27]
+		line-name = "led_gbe#";
+	};
+
+	gpio31 {
+		gpio-hog;
+		output-high;
+		gpios = <31 GPIO_ACTIVE_HIGH>; // CP_MPP[31]
+		line-name = "m2_pwren";
+	};
+};
+
+&cp0_gpio1 {
+	xmiphyrstgpio {
+		gpio-hog;
+		output-high;
+		gpios = <21 GPIO_ACTIVE_HIGH>; // CPP_MPP[53]
+		line-name = "xmi_rst#";
+	};
+};
