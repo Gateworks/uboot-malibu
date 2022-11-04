@@ -3442,6 +3442,7 @@ static int gop_port_init(struct mvpp2_port *port)
 		break;
 
 	case PHY_INTERFACE_MODE_SFI:
+	case PHY_INTERFACE_MODE_10GBASER:
 		num_of_act_lanes = 2;
 		mac_num = 0;
 		/* configure PCS */
@@ -3494,8 +3495,8 @@ static void gop_port_enable(struct mvpp2_port *port, int enable)
 		break;
 
 	case PHY_INTERFACE_MODE_SFI:
+	case PHY_INTERFACE_MODE_10GBASER:
 		gop_xlg_mac_port_enable(port, enable);
-
 		break;
 	default:
 		log_err("%s: Wrong port mode (%d)\n", __func__,
