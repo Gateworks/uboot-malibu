@@ -428,7 +428,7 @@ int aquantia_config(struct phy_device *phydev)
 	fault = phy_read(phydev, MDIO_MMD_VEND1, GLOBAL_FAULT);
 
 	if (id != 0)
-		debug("%s running firmware version %X.%X.%X\n",
+		printf("%s running firmware version %X.%X.%X\n",
 		      phydev->dev->name, (id >> 8), id & 0xff,
 		      (rstatus >> 4) & 0xf);
 
