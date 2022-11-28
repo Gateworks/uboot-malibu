@@ -133,16 +133,24 @@ static int aquantia_read_fw(u8 **fw_addr, size_t *fw_length)
 	loff_t length, read;
 	int ret;
 	void *addr = NULL;
+	char *fname, *fpart;
 
 	*fw_addr = NULL;
 	*fw_length = 0;
+
+	fname = env_get("aquantia_fw_name");
+	if (!fname)
+		fname = CONFIG_PHY_AQUANTIA_FW_NAME;
+	fpart = env_get("aquantia_fw_part");
+	if (!fpart)
+		fpart = CONFIG_PHY_AQUANTIA_FW_PART;
 	debug("Loading Aquantia microcode from %s %s\n",
-	      CONFIG_PHY_AQUANTIA_FW_PART, CONFIG_PHY_AQUANTIA_FW_NAME);
-	ret = fs_set_blk_dev("mmc", CONFIG_PHY_AQUANTIA_FW_PART, FS_TYPE_ANY);
+	      fpart, fname);
+	ret = fs_set_blk_dev("mmc", fpart, FS_TYPE_ANY);
 	if (ret < 0)
 		goto cleanup;
 
-	ret = fs_size(CONFIG_PHY_AQUANTIA_FW_NAME, &length);
+	ret = fs_size(fname, &length);
 	if (ret < 0)
 		goto cleanup;
 
@@ -152,11 +160,11 @@ static int aquantia_read_fw(u8 **fw_addr, size_t *fw_length)
 		goto cleanup;
 	}
 
-	ret = fs_set_blk_dev("mmc", CONFIG_PHY_AQUANTIA_FW_PART, FS_TYPE_ANY);
+	ret = fs_set_blk_dev("mmc", fpart, FS_TYPE_ANY);
 	if (ret < 0)
 		goto cleanup;
 
-	ret = fs_read(CONFIG_PHY_AQUANTIA_FW_NAME, (ulong)addr, 0, length,
+	ret = fs_read(fname, (ulong)addr, 0, length,
 		      &read);
 	if (ret < 0)
 		goto cleanup;
@@ -168,8 +176,8 @@ static int aquantia_read_fw(u8 **fw_addr, size_t *fw_length)
 cleanup:
 	if (ret < 0) {
 		printf("loading firmware file %s %s failed with error %d\n",
-		       CONFIG_PHY_AQUANTIA_FW_PART,
-		       CONFIG_PHY_AQUANTIA_FW_NAME, ret);
+		       fpart,
+		       fname, ret);
 		free(addr);
 	}
 	return ret;
