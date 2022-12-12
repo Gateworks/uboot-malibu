@@ -33,8 +33,20 @@ int board_early_init_r(void)
 
 int board_init(void)
 {
+	struct udevice *dev;
+	int ret;
+
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
+
+	/* probe comphy */
+	if (IS_ENABLED(CONFIG_MVEBU_COMPHY_SUPPORT)) {
+		ret = uclass_get_device_by_driver(UCLASS_MISC,
+						  DM_DRIVER_GET(mvebu_comphy),
+						  &dev);
+		if (ret)
+			printf("Failed to initialize comphy!\n");
+	}
 
 	return 0;
 }
