@@ -330,6 +330,9 @@ static int gsc_hwmon(struct udevice *dev)
 
 			printf("%-8s: %d.%03dV\n", label, val / 1000, val % 1000);
 			break;
+		case 4: // fan tach
+			printf("%-8s: %dRPM\n", label, val * 30);
+			break;
 		}
 	}
 
