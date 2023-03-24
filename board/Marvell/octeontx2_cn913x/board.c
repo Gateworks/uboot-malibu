@@ -8,6 +8,7 @@
 #include <env.h>
 #include <hexdump.h>
 #include <i2c.h>
+#include <phy.h>
 #include <power/regulator.h>
 
 /* I2C */
@@ -311,6 +312,23 @@ int ft_board_setup(void *fdt, struct bd_info *bd)
 
 	/* set board model dt prop */
 	fdt_setprop_string(fdt, 0, "board", gsc_info.model);
+
+	return 0;
+}
+
+int board_phy_config(struct phy_device *phydev)
+{
+	switch (phydev->phy_id) {
+	case 0xd565a401: /* MaxLinear GPY111 */
+		puts("GPY111 ");
+		break;
+	case 0x31c31c13:
+		puts("AQR113C ");
+		break;
+	}
+
+	if (phydev->drv->config)
+		phydev->drv->config(phydev);
 
 	return 0;
 }
