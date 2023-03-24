@@ -229,6 +229,12 @@
 				reg = <0x92>;
 				label = "vdd_0p7";
 			};
+
+			channel@94 {
+				gw,mode = <2>;
+				reg = <0x94>;
+				label = "vdd_1p0";
+			};
 		};
 
 		fan-controller@2c {
