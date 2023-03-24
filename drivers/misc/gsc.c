@@ -281,9 +281,9 @@ static int gsc_hwmon(struct udevice *dev)
 	u32 reg, mode, val, offset;
 	const char *label;
 	ofnode node;
-	u8 buf[2];
+	u8 buf[3];
 	u32 r[2];
-	int ret;
+	int ret, sz;
 
 	/* iterate over hwmon nodes */
 	ofnode_for_each_subnode(node, dev_read_subnode(dev, "adc")) {
@@ -296,12 +296,15 @@ static int gsc_hwmon(struct udevice *dev)
 			continue;
 
 		memset(buf, 0, sizeof(buf));
-		ret = gsc_i2c_read(priv->hwmon, reg, buf, sizeof(buf));
+		sz = (mode == 3) ? 3 : 2;
+		ret = gsc_i2c_read(priv->hwmon, reg, buf, sz);
 		if (ret) {
 			printf("i2c error: %d\n", ret);
 			continue;
 		}
-		val = buf[0] | buf[1] << 8;
+		val = 0;
+		while (sz-- > 0)
+			val |= (buf[sz] << (8 * sz));
 
 		switch (mode) {
 		case 0: /* temperature (C*10) */
@@ -310,6 +313,7 @@ static int gsc_hwmon(struct udevice *dev)
 			printf("%-8s: %d.%ldC\n", label, val / 10, abs(val % 10));
 			break;
 		case 1: /* prescaled voltage */
+		case 3:
 			if (val != 0xffff)
 				printf("%-8s: %d.%03dV\n", label, val / 1000, val % 1000);
 			break;
