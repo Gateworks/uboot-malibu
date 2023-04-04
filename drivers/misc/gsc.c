@@ -396,9 +396,7 @@ static int gsc_probe(struct udevice *dev)
 	if (priv->rtc)
 		dev_set_priv(priv->rtc, priv);
 
-#ifdef CONFIG_SPL_BUILD
 	gsc_banner(dev);
-#endif
 
 	return 0;
 };
