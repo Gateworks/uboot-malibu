@@ -183,7 +183,7 @@
 				gw,mode = <2>;
 				reg = <0x82>;
 				label = "vdd_5p0";
-				gw,voltage-divider-ohms = <10000 10000>;
+				gw,voltage-divider-ohms = <22100 10000>;
 			};
 
 			channel@84 {
